@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Gestión de Productos - Sistema de Gestión</title>
+  <link rel="stylesheet" href="/style.css">
+</head>
+<body>
+  <nav class="navbar">
+    <ul class="nav-list">
+      <li><a href="/">Inicio</a></li>
+      <li><a href="/data.html">Productos</a></li>
+      <li><a href="/contact">Contacto</a></li>
+    </ul>
+  </nav>
+
+  <div class="container">
+    <h1>Gestión de Productos</h1>
+
+    <div class="form-container">
+      <h2>Agregar Nuevo Producto</h2>
+      <form id="productForm">
+        <div class="form-group">
+          <label for="nombre">Nombre *</label>
+          <input type="text" id="nombre" class="form-control" required>
+          <div class="error-message" id="nombreError"></div>
+        </div>
+
+        <div class="form-group">
+          <label for="descripcion">Descripción *</label>
+          <input type="text" id="descripcion" class="form-control" required>
+          <div class="error-message" id="descripcionError"></div>
+        </div>
+
+        <div class="form-group">
+          <label for="precio">Precio *</label>
+          <input type="number" id="precio" class="form-control" step="0.01" min="0" required>
+          <div class="error-message" id="precioError"></div>
+        </div>
+
+        <button type="submit" class="btn btn-primary">Agregar Producto</button>
+      </form>
+    </div>
+
+    <div class="table-container">
+      <h2>Lista de Productos</h2>
+      <table id="tabla">
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Nombre</th>
+            <th>Descripción</th>
+            <th>Precio</th>
+            <th>Acciones</th>
+          </tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+    </div>
+  </div>
+
+  <script>
+    async function obtenerProductos() {
+      const res = await fetch("/data");
+      const data = await res.json();
+      const cuerpo = document.querySelector("#tabla tbody");
+      cuerpo.innerHTML = "";
+      data.forEach(item => {
+        const fila = document.createElement("tr");
+        fila.innerHTML = `
+          <td>${item.id}</td>
+          <td><input class="form-control" value="${item.nombre}" onchange="actualizarCampo(${item.id}, 'nombre', this.value)"></td>
+          <td><input class="form-control" value="${item.descripcion}" onchange="actualizarCampo(${item.id}, 'descripcion', this.value)"></td>
+          <td><input type="number" class="form-control" value="${item.precio}" step="0.01" min="0" onchange="actualizarCampo(${item.id}, 'precio', this.value)"></td>
+          <td><button class="btn btn-danger" onclick="eliminarProducto(${item.id})">Eliminar</button></td>
+        `;
+        cuerpo.appendChild(fila);
+      });
+    }
+
+    document.getElementById('productForm').addEventListener('submit', async function(e) {
+      e.preventDefault();
+      
+      // Reset error messages
+      document.querySelectorAll('.error-message').forEach(el => el.textContent = '');
+      
+      let isValid = true;
+      
+      // Validate nombre
+      const nombre = document.getElementById('nombre').value.trim();
+      if (nombre.length < 2) {
+        document.getElementById('nombreError').textContent = 'El nombre debe tener al menos 2 caracteres';
+        isValid = false;
+      }
+      
+      // Validate descripcion
+      const descripcion = document.getElementById('descripcion').value.trim();
+      if (descripcion.length < 5) {
+        document.getElementById('descripcionError').textContent = 'La descripción debe tener al menos 5 caracteres';
+        isValid = false;
+      }
+      
+      // Validate precio
+      const precio = parseFloat(document.getElementById('precio').value);
+      if (isNaN(precio) || precio <= 0) {
+        document.getElementById('precioError').textContent = 'El precio debe ser un número mayor a 0';
+        isValid = false;
+      }
+      
+      if (isValid) {
+        await fetch("/data", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ nombre, descripcion, precio })
+        });
+
+        document.getElementById('nombre').value = "";
+        document.getElementById('descripcion').value = "";
+        document.getElementById('precio').value = "";
+        obtenerProductos();
+      }
+    });
+
+    async function actualizarCampo(id, campo, valor) {
+      if (campo === 'precio') {
+        valor = parseFloat(valor);
+        if (isNaN(valor) || valor <= 0) {
+          alert('El precio debe ser un número mayor a 0');
+          return;
+        }
+      } else if (valor.trim().length < (campo === 'nombre' ? 2 : 5)) {
+        alert(`El ${campo} debe tener al menos ${campo === 'nombre' ? 2 : 5} caracteres`);
+        return;
+      }
+
+      await fetch("/data", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id, campo, valor })
+      });
+    }
+
+    async function eliminarProducto(id) {
+      if (confirm('¿Está seguro que desea eliminar este producto?')) {
+        await fetch("/data", {
+          method: "DELETE",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ id })
+        });
+        obtenerProductos();
+      }
+    }
+
+    obtenerProductos();
+  </script>
+</body>
+</html>

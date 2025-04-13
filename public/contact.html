@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Contacto - Sistema de Gestión</title>
+  <link rel="stylesheet" href="/style.css">
+</head>
+<body>
+  <nav class="navbar">
+    <ul class="nav-list">
+      <li><a href="/">Inicio</a></li>
+      <li><a href="/data.html">Productos</a></li>
+      <li><a href="/contact">Contacto</a></li>
+    </ul>
+  </nav>
+
+  <div class="container">
+    <h1>Formulario de Contacto</h1>
+    
+    <div class="form-container">
+      <form id="contactForm">
+        <div class="form-group">
+          <label for="nombre">Nombre completo *</label>
+          <input type="text" id="nombre" name="nombre" class="form-control" required>
+          <div class="error-message" id="nombreError"></div>
+        </div>
+
+        <div class="form-group">
+          <label for="correo">Correo electrónico *</label>
+          <input type="email" id="correo" name="correo" class="form-control" required>
+          <div class="error-message" id="correoError"></div>
+        </div>
+
+        <div class="form-group">
+          <label for="asunto">Asunto *</label>
+          <input type="text" id="asunto" name="asunto" class="form-control" required>
+          <div class="error-message" id="asuntoError"></div>
+        </div>
+
+        <div class="form-group">
+          <label for="mensaje">Mensaje *</label>
+          <textarea id="mensaje" name="mensaje" class="form-control" rows="5" required></textarea>
+          <div class="error-message" id="mensajeError"></div>
+        </div>
+
+        <button type="submit" class="btn btn-primary">Enviar Mensaje</button>
+      </form>
+    </div>
+  </div>
+
+  <script>
+    document.getElementById('contactForm').addEventListener('submit', function(e) {
+      e.preventDefault();
+      
+      // Reset error messages
+      document.querySelectorAll('.error-message').forEach(el => el.textContent = '');
+      
+      let isValid = true;
+      
+      // Validate nombre
+      const nombre = document.getElementById('nombre').value.trim();
+      if (nombre.length < 3) {
+        document.getElementById('nombreError').textContent = 'El nombre debe tener al menos 3 caracteres';
+        isValid = false;
+      }
+      
+      // Validate email
+      const correo = document.getElementById('correo').value.trim();
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!emailRegex.test(correo)) {
+        document.getElementById('correoError').textContent = 'Por favor ingrese un correo electrónico válido';
+        isValid = false;
+      }
+      
+      // Validate asunto
+      const asunto = document.getElementById('asunto').value.trim();
+      if (asunto.length < 5) {
+        document.getElementById('asuntoError').textContent = 'El asunto debe tener al menos 5 caracteres';
+        isValid = false;
+      }
+      
+      // Validate mensaje
+      const mensaje = document.getElementById('mensaje').value.trim();
+      if (mensaje.length < 10) {
+        document.getElementById('mensajeError').textContent = 'El mensaje debe tener al menos 10 caracteres';
+        isValid = false;
+      }
+      
+      if (isValid) {
+        alert('Formulario validado correctamente');
+        this.reset();
+      }
+    });
+  </script>
+</body>
+</html>
