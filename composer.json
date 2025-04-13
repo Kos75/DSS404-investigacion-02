@@ -1,0 +1,14 @@
+{
+    "name": "empresa-x/reactphp-sitio",
+    "description": "Sitio web dinámico usando ReactPHP con servidor no bloqueante",
+    "type": "project",
+    "require": {
+      "react/http": "^1.10",
+      "react/mysql": "^0.5"
+    },
+    "autoload": {
+      "psr-4": {
+        "App\\": "src/"
+      }
+    }
+  }
